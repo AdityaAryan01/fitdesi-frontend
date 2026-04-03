@@ -1,0 +1,301 @@
+.page {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 960px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: fade-up 0.4s ease;
+}
+
+.greeting {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  line-height: 1;
+}
+
+.name { color: var(--text-primary); }
+
+.date {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  margin-top: 6px;
+}
+
+/* Ring cards */
+.ringRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  animation: fade-up 0.45s ease;
+}
+
+.ringCard {
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.radialWrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.radialCenter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.ringInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.ringVal {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--accent);
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.ringUnit {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.ringInfo { flex: 1; min-width: 0; }
+
+.ringLabel {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.ringRemaining {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 2px;
+}
+
+.ringTarget {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+/* Tips card */
+.tipsCard {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tipsHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.tipsList { display: flex; flex-direction: column; gap: 8px; }
+
+.tipItem {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  padding: 8px 12px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--accent);
+}
+
+/* Stats grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  animation: fade-up 0.5s ease;
+}
+
+.statCard { padding: 18px; }
+
+.statHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.statIcon {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconAccent { background: var(--accent-dim); color: var(--accent); }
+.iconGreen  { background: var(--green-dim);  color: var(--green); }
+.iconSteel  { background: var(--steel-dim);  color: var(--steel); }
+
+.statLabel {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  flex: 1;
+}
+
+.statValue {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.statMax {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+/* Today's meals */
+.mealsCard {
+  padding: 20px;
+  animation: fade-up 0.52s ease;
+}
+
+.mealsList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.mealRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+}
+
+.mealRow:hover { background: var(--bg-elevated); }
+
+.mealName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.mealMacros {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.mealKcal {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.mealProtein {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--green);
+  font-weight: 700;
+}
+
+/* Chart */
+.chartCard {
+  padding: 20px;
+  animation: fade-up 0.55s ease;
+}
+
+.chartHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.chartTitle {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+/* Body stats */
+.bodyCard {
+  padding: 20px;
+  animation: fade-up 0.6s ease;
+}
+
+.bodyGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.bodyStat {
+  text-align: center;
+  padding: 14px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+}
+
+.bodyStatVal {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  letter-spacing: 0.04em;
+  color: var(--text-primary);
+  text-transform: capitalize;
+}
+
+.bodyStatLabel {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+
+@media (max-width: 900px) {
+  .ringRow, .statsGrid { grid-template-columns: 1fr 1fr; }
+  .bodyGrid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .ringRow, .statsGrid, .bodyGrid { grid-template-columns: 1fr; }
+  .ringCard { flex-direction: column; text-align: center; }
+}
