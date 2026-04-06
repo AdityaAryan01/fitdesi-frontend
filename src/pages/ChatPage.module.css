@@ -179,34 +179,33 @@
 /* Typing indicator */
 .typingWrap {
   display: flex;
-  align-items: flex-end;
-  gap: 10px;
-  align-self: flex-start;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0;
+  padding: 0 20px;
 }
 
 .typingBubble {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 14px 16px;
   background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  border-bottom-left-radius: 4px;
+  padding: 10px 16px;
+  border-radius: 18px 18px 18px 4px;
+  display: flex;
+  gap: 4px;
 }
 
 .dot {
   width: 6px; height: 6px;
   background: var(--text-muted);
   border-radius: 50%;
-  animation: typing-bounce 1.2s ease-in-out infinite;
+  animation: dot-pulse 1.4s infinite;
 }
+
 .dot:nth-child(2) { animation-delay: 0.2s; }
 .dot:nth-child(3) { animation-delay: 0.4s; }
 
-@keyframes typing-bounce {
-  0%, 100% { transform: translateY(0); opacity: 0.4; }
-  50% { transform: translateY(-4px); opacity: 1; }
+@keyframes dot-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.1); }
 }
 
 /* Quick prompts */
@@ -343,7 +342,7 @@
   gap: 6px;
 }
 .mdContent strong {
-  color: var(--accent); /* Makes the calorie numbers pop in the chat bubble */
+  color: var(--accent);
   font-weight: 700;
 }
 
@@ -391,4 +390,55 @@
   line-height: 1.55;
   color: var(--text-primary);
   font-size: 0.9rem;
+}
+
+/* ── Empty State ──────────────────────────────────── */
+.emptyStateContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.emptyStateBranding {
+  margin-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.emptyIcon {
+  width: 80px; height: 80px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.emptyTitle {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, #fff 40%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.emptySub {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  max-width: 500px;
+  margin: 0;
 }

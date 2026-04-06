@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
-import { BookOpen, Flame, Dumbbell, Calendar, Search, RefreshCw } from 'lucide-react'
+import { BookOpen, Flame, Dumbbell, Calendar, Search, RefreshCw, Trash2 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
-import { getMealLogs } from '../api'
+import { getMealLogs, deleteMealLog } from '../api'
 import styles from './LogsPage.module.css'
 
 export default function LogsPage() {
@@ -10,6 +10,16 @@ export default function LogsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState(false)
   const [search, setSearch]   = useState('')
+
+  const handleDelete = async (logId) => {
+    if (!user?.id || !window.confirm('Delete this meal log?')) return
+    try {
+      await deleteMealLog(user.id, logId)
+      setLogs(prev => prev.filter(l => l.id !== logId))
+    } catch (err) {
+      console.error('Delete failed:', err)
+    }
+  }
 
   const fetchLogs = useCallback(async () => {
     if (!user?.id) return
@@ -154,15 +164,20 @@ export default function LogsPage() {
                   </div>
                 </div>
               </div>
-              <div className={styles.logMacros}>
-                <div className={styles.macroPill} style={{ background: 'var(--accent-dim)', color: 'var(--accent)' }}>
-                  <Flame size={11} />
-                  {Math.round(log.calories)} kcal
+              <div className={styles.logRight}>
+                <div className={styles.logMacros}>
+                  <div className={styles.macroPill} style={{ background: 'var(--accent-dim)', color: 'var(--accent)' }}>
+                    <Flame size={11} />
+                    {Math.round(log.calories)} kcal
+                  </div>
+                  <div className={styles.macroPill} style={{ background: 'var(--green-dim)', color: 'var(--green)' }}>
+                    <Dumbbell size={11} />
+                    {Math.round(log.protein)}g
+                  </div>
                 </div>
-                <div className={styles.macroPill} style={{ background: 'var(--green-dim)', color: 'var(--green)' }}>
-                  <Dumbbell size={11} />
-                  {Math.round(log.protein)}g
-                </div>
+                <button className={styles.deleteBtn} onClick={() => handleDelete(log.id)} title="Delete log">
+                  <Trash2 size={16} />
+                </button>
               </div>
             </div>
           ))

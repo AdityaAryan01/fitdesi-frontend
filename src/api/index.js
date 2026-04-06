@@ -38,6 +38,7 @@ export const renameThread = (user_id, thread_id, title) => api.put(`/user/${Stri
 export const getProgress = (user_id) => api.get(`/user/${String(user_id)}/progress`).then(r => r.data)
 export const getWeeklyProgress = (userId) => api.get(`/user/${String(userId)}/weekly`).then(r => r.data)
 export const getMealLogs = (user_id) => api.get(`/user/${String(user_id)}/logs`).then(r => r.data)
+export const deleteMealLog = (user_id, log_id) => api.delete(`/user/${String(user_id)}/logs/${String(log_id)}`).then(r => r.data)
 export const getUser     = (user_id) => api.get(`/user/${String(user_id)}`).then(r => r.data)
 export const createUser  = (data)    => api.post('/user', data).then(r => r.data)
 

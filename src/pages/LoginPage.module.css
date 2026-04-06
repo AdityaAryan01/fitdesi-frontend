@@ -1,195 +1,368 @@
-.page {
+.authPage {
   min-height: 100vh;
   display: flex;
-  align-items: center;
-  justify-content: center;
   background: var(--bg-void);
-  position: relative;
-  overflow: hidden;
-  padding: 24px;
+  overflow-x: hidden;
 }
 
-.container {
-  width: 100%;
-  max-width: 460px;
-  position: relative;
-  z-index: 1;
-}
-
-/* ── Welcome ───────────────────────────────────────── */
-.welcome {
-  text-align: center;
+.authLeft {
+  flex: 1.2;
+  background: linear-gradient(135deg, var(--bg-void) 0%, rgba(255,107,1,0.05) 100%);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 20px;
+  justify-content: center;
+  padding: 80px;
+  position: relative;
+  border-right: 1px solid var(--border);
 }
 
-.welcomeIcon {
-  width: 72px; height: 72px;
+.authLeft::before {
+  content: '';
+  position: absolute;
+  top: 20%; left: 10%;
+  width: 300px; height: 300px;
+  background: var(--accent);
+  filter: blur(150px);
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.brandContainer {
+  position: relative;
+  z-index: 2;
+  max-width: 500px;
+}
+
+.brandIcon {
+  width: 80px; height: 80px;
   background: var(--accent);
   border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  box-shadow: 0 0 40px var(--accent-glow), 0 0 80px rgba(255,107,26,0.15);
-  animation: pulse-accent 2.5s ease-in-out infinite;
+  margin-bottom: 32px;
+  box-shadow: 0 0 40px var(--accent-glow);
 }
 
-.welcomeTitle {
+.brandName {
   font-family: var(--font-display);
-  font-size: 5rem;
-  letter-spacing: 0.06em;
+  font-size: 4.5rem;
+  letter-spacing: 0.04em;
+  margin: 0;
   line-height: 1;
-  background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+  background: linear-gradient(135deg, #fff 40%, var(--accent) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.welcomeSub {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
-  max-width: 300px;
+.brandTagline {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  font-weight: 700;
+  margin: 12px 0 24px;
 }
 
-.featureRow {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: center;
+.brandDescription {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 40px;
 }
 
-.featureChip {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 99px;
-  font-size: 0.78rem;
-  color: var(--text-secondary);
+.brandDescription em {
+  color: var(--accent);
+  font-style: normal;
   font-weight: 600;
 }
 
-.startBtn {
-  width: 100%;
-  justify-content: center;
-  padding: 14px 24px;
-  font-size: 1rem;
-  letter-spacing: 0.04em;
-}
-
-.note {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-}
-
-/* ── Form card ─────────────────────────────────────── */
-.formCard {
-  padding: 28px;
+.brandStats {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
-.formHeader {
+.brandStat {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  letter-spacing: 0.04em;
+  gap: 12px;
+  font-size: 0.95rem;
   color: var(--text-primary);
+  font-weight: 600;
 }
 
-.logoSmall {
-  width: 28px; height: 28px;
-  background: var(--accent);
-  border-radius: 7px;
+.brandStat svg {
+  color: var(--accent);
+}
+
+.quoteCard {
+  margin-top: 60px;
+  padding: 24px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.quoteCard p {
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.quoteAuthor {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.leftFooter {
+  margin-top: auto;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.authRight {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  flex-shrink: 0;
+  padding: 40px;
+  background: var(--bg-void);
 }
 
-/* Step pill (top-right of form header) */
-.stepPill {
-  margin-left: auto;
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
+.formWrapper, .authForm {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.welcomeText h2 {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+}
+
+.welcomeText p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.formHead h1 {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+}
+
+.formHead p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.giantBtn {
+  width: 100%;
+  height: 56px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.altAction {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.altAction span {
+  font-size: 0.9rem;
   color: var(--text-muted);
+}
+
+.textLink {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.googleBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  height: 52px;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: 99px;
-  padding: 3px 10px;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.stepSubtitle {
-  font-size: 0.82rem;
-  color: var(--text-secondary);
-  line-height: 1.5;
-  margin-top: -8px;
+.googleBtn:hover {
+  background: var(--bg-card);
+  border-color: var(--text-muted);
 }
 
-/* Or divider (step 2) */
-.orDivider {
-  text-align: center;
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  font-family: var(--font-mono);
-}
-
-/* ── Field grid ────────────────────────────────────── */
-.fieldGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.field label {
+.formDivider {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
-  font-weight: 700;
+  gap: 16px;
   color: var(--text-muted);
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   font-family: var(--font-mono);
 }
 
-/* ── Pills ─────────────────────────────────────────── */
+.formDivider::before, .formDivider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inputGroup label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.inputGroup input {
+  height: 52px;
+  padding: 0 16px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.inputGroup input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-dim);
+}
+
+.authError {
+  padding: 12px 16px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 10px;
+  color: #ef4444;
+  font-size: 0.9rem;
+}
+
+.formFooter {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.formFooter button {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.backLink {
+  margin-top: 8px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.backLink:hover {
+  color: var(--text-secondary);
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 1024px) {
+  .authLeft {
+    padding: 60px 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .authPage {
+    flex-direction: column;
+  }
+  .authLeft {
+    padding: 60px 24px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .brandName {
+    font-size: 3.5rem;
+  }
+  .authRight {
+    padding: 60px 24px;
+  }
+}
+
+/* ── Onboarding / Grid ─────────────────────────────── */
+.inputGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
 .pillGroup {
   display: flex;
-  gap: 6px;
   flex-wrap: wrap;
+  gap: 8px;
 }
 
 .pill {
-  padding: 6px 14px;
+  padding: 8px 16px;
   border-radius: 99px;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   color: var(--text-secondary);
-  font-family: var(--font-body);
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.18s;
+  transition: all 0.2s;
   text-transform: capitalize;
 }
 
@@ -199,106 +372,48 @@
 }
 
 .pillActive {
-  background: var(--accent-dim) !important;
-  border-color: var(--accent) !important;
-  color: var(--accent) !important;
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
-/* ── Error ─────────────────────────────────────────── */
-.error {
-  background: rgba(239,68,68,0.1);
-  border: 1px solid rgba(239,68,68,0.3);
-  border-radius: var(--radius-sm);
-  color: #ef4444;
-  padding: 10px 14px;
-  font-size: 0.85rem;
-}
-
-/* ── Buttons ───────────────────────────────────────── */
-.submitBtn {
-  width: 100%;
-  justify-content: center;
-  padding: 14px;
-  font-size: 0.95rem;
-}
-
-/* flex version for action row */
-.submitBtnFlex {
-  flex: 1;
-  justify-content: center;
-  padding: 13px;
-  font-size: 0.9rem;
-}
-
-.backBtn {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-family: var(--font-body);
-  font-size: 0.82rem;
-  cursor: pointer;
-  text-align: center;
-  transition: color 0.18s;
-}
-.backBtn:hover { color: var(--text-secondary); }
-
-/* ── Step 4: Calculated tag ────────────────────────── */
-.calculatedTag {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 0.62rem;
-  color: var(--green);
-  font-family: var(--font-mono);
-  background: var(--green-dim);
-  padding: 2px 6px;
-  border-radius: 99px;
-  text-transform: none;
-  letter-spacing: 0;
-  font-weight: 600;
-}
-
-/* ── Step 4: Calculator toggle button ──────────────── */
+/* ── Calculator ───────────────────────────────────── */
 .calcToggleBtn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 11px 16px;
+  padding: 12px;
   background: var(--bg-elevated);
-  border: 1px dashed var(--border-accent);
-  border-radius: var(--radius-sm);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
   color: var(--accent);
-  font-family: var(--font-body);
-  font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.18s;
-  letter-spacing: 0.01em;
+  transition: all 0.2s;
 }
 
-.calcToggleBtn:hover,
-.calcToggleOpen {
+.calcToggleBtn:hover, .calcToggleOpen {
   background: var(--accent-dim);
   border-style: solid;
+  border-color: var(--accent);
 }
 
-/* ── Step 4: Calculator panel ──────────────────────── */
 .calcPanel {
   background: var(--bg-elevated);
-  border: 1px solid var(--border-accent);
-  border-radius: var(--radius);
-  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 .calcPanelTitle {
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
   font-family: var(--font-mono);
-  line-height: 1.5;
 }
 
 .calcField {
@@ -308,62 +423,61 @@
 }
 
 .calcField label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--text-muted);
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-weight: 700;
 }
 
-/* Activity cards grid */
 .activityGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 12px;
 }
 
 .activityCard {
-  padding: 10px 12px;
-  background: var(--bg-card);
+  padding: 12px;
+  background: var(--bg-void);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
+  border-radius: 12px;
   text-align: left;
-  transition: all 0.18s;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.activityCard:hover { border-color: var(--accent); }
+.activityCard:hover {
+  border-color: var(--accent);
+}
 
 .activityActive {
-  background: var(--accent-dim) !important;
-  border-color: var(--accent) !important;
+  background: var(--accent-dim);
+  border-color: var(--accent);
+}
+
+.activityActive .activityLabel {
+  color: var(--accent);
 }
 
 .activityLabel {
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--text-primary);
-  font-family: var(--font-body);
 }
-
-.activityActive .activityLabel { color: var(--accent); }
 
 .activitySub {
-  font-size: 0.67rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
-  margin-top: 3px;
-  font-family: var(--font-mono);
-  line-height: 1.3;
+  margin-top: 4px;
+  line-height: 1.4;
 }
 
-/* Result cards */
 .calcResult {
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-top: 4px;
-  border-top: 1px solid var(--border);
+  gap: 16px;
 }
 
 .calcResultGrid {
@@ -374,73 +488,68 @@
 
 .calcStat {
   text-align: center;
-  padding: 10px 6px;
-  background: var(--bg-card);
-  border-radius: var(--radius-sm);
+  padding: 12px 4px;
+  background: var(--bg-void);
+  border-radius: 10px;
   border: 1px solid var(--border);
 }
 
 .calcStatVal {
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  letter-spacing: 0.04em;
+  font-size: 1.1rem;
+  font-weight: 800;
   color: var(--text-primary);
-  line-height: 1;
+  font-family: var(--font-display);
 }
 
 .calcStatLabel {
-  font-size: 0.58rem;
+  font-size: 0.6rem;
   color: var(--text-muted);
-  font-family: var(--font-mono);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-top: 5px;
-}
-
-.calcLogic {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  line-height: 1.55;
-  padding: 8px 12px;
-  background: var(--bg-card);
-  border-radius: var(--radius-sm);
-  border-left: 2px solid var(--accent);
+  margin-top: 4px;
 }
 
 .applyBtn {
   width: 100%;
+  padding: 12px;
   justify-content: center;
-  padding: 11px;
 }
 
-/* ── Step 4: Action row (skip + submit) ────────────── */
+.calculatedTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  background: var(--green-dim);
+  color: var(--green);
+  padding: 2px 8px;
+  border-radius: 99px;
+  margin-left: 8px;
+  text-transform: none;
+  font-weight: 600;
+}
+
 .actionRow {
   display: flex;
-  gap: 10px;
-  align-items: center;
+  gap: 12px;
 }
 
 .skipBtn {
+  flex: 1;
+  height: 52px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 12px 14px;
+  justify-content: center;
+  gap: 8px;
   background: transparent;
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text-muted);
-  font-family: var(--font-body);
-  font-size: 0.78rem;
+  border-radius: 12px;
+  color: var(--text-secondary);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.18s;
-  white-space: nowrap;
-  flex-shrink: 0;
+  transition: all 0.2s;
 }
 
 .skipBtn:hover {
-  color: var(--text-secondary);
+  background: var(--bg-elevated);
   border-color: var(--text-muted);
 }
-
-.skipBtn:disabled { opacity: 0.5; cursor: not-allowed; }

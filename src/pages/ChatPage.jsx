@@ -109,23 +109,16 @@ export default function ChatPage() {
   const bottomRef = useRef(null)
   const inputRef  = useRef(null)
 
-  // ── Auto-create thread if user lands on /chat with no threadId ──
-  useEffect(() => {
-    if (!threadId && user?.id && !isCreatingThread) {
-      setIsCreating(true)
-      createThread(String(user.id))
-        .then(thread => { setIsCreating(false); navigate(`/chat/${thread.id}`, { replace: true }) })
-        .catch(() => {
-          // Backend unreachable — show welcome msg, user can still use New Conversation btn
-          setMessages([WELCOME_MSG(user?.name)])
-          setIsCreating(false)
-        })
-    }
-  }, [threadId, user?.id])
+  // ── REMOVED: Auto-create thread ──────────────────────────────────
+  // A new thread is only created when the user clicks 'New Chat'
+  // or types their first message in an empty state (handled below).
 
   // ── Load history when threadId changes ──────────────────────────
   useEffect(() => {
-    if (!threadId) return
+    if (!threadId) {
+      setMessages([]) // clear messages for empty state
+      return
+    }
 
     const loadThread = async () => {
       setIsFetching(true)
@@ -145,7 +138,7 @@ export default function ChatPage() {
     }
 
     loadThread()
-  }, [threadId])
+  }, [threadId, user?.id])
 
   // ── Auto-scroll ─────────────────────────────────────────────────
   useEffect(() => {
@@ -155,14 +148,25 @@ export default function ChatPage() {
   // ── Send message ────────────────────────────────────────────────
   const sendMessage = async (text) => {
     const msg = text || input.trim()
-    if (!msg || loading || !threadId) return
+    if (!msg || loading) return
 
+    let currentThreadId = threadId
     setInput('')
     setMessages(m => [...m, { role: 'user', content: msg }])
     setLoading(true)
 
     try {
-      const data = await sendChat(String(user?.id || 'guest'), threadId, msg)
+      // If no thread exists yet, create one first
+      if (!currentThreadId) {
+        const newThread = await createThread(String(user?.id))
+        currentThreadId = newThread.id
+        // Navigate silently or update URL without full reload if possible, 
+        // but for now, we'll navigate and the message will be sent.
+        // Actually, we should navigate first so the UI state is correct.
+        navigate(`/chat/${currentThreadId}`, { replace: true })
+      }
+
+      const data = await sendChat(String(user?.id || 'guest'), currentThreadId, msg)
       setMessages(prev => [...prev, { role: 'bot', content: data.reply }])
 
       // ✅ FIX: If the backend created a title for this new thread, tell the Sidebar to refresh!
@@ -227,7 +231,24 @@ export default function ChatPage() {
 
       {/* Messages */}
       <div className={styles.messages}>
-        {isFetchingHistory ? (
+        {!threadId ? (
+          <div className={styles.emptyStateContainer}>
+            <div className={`${styles.emptyStateBranding} animate-fade-up`}>
+              <div className={styles.emptyIcon}><Bot size={48} /></div>
+              <h1 className={styles.emptyTitle}>Fitness with Desi Swag 🔥</h1>
+              <p className={styles.emptySub}>
+                Start a conversation with your AI gym bro. Log meals, check macros, or get workout tips in pure Hinglish.
+              </p>
+            </div>
+            <div className={styles.promptGrid}>
+              {QUICK_PROMPTS.map(p => (
+                <button key={p} className={styles.promptChip} onClick={() => sendMessage(p)}>
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : isFetchingHistory ? (
           <div className={styles.loadingHistory}>
             <Loader size={24} className={styles.spin} />
             <p>Bhai history dhoondh raha hoon...</p>
@@ -239,8 +260,8 @@ export default function ChatPage() {
         <div ref={bottomRef} />
       </div>
 
-      {/* Quick prompts — only on fresh threads */}
-      {!isFetchingHistory && messages.length <= 1 && (
+      {/* Quick prompts — kept for mobile or small screens even when chatting */}
+      {threadId && !isFetchingHistory && messages.length <= 1 && (
         <div className={styles.quickPrompts}>
           <div className={styles.quickLabel}>Try asking:</div>
           <div className={styles.promptGrid}>
@@ -264,12 +285,12 @@ export default function ChatPage() {
             onKeyDown={handleKey}
             placeholder="Kya khaya? Or koi question? (Enter to send)"
             rows={1}
-            disabled={!threadId || isFetchingHistory}
+            disabled={isFetchingHistory}
           />
           <button
-            className={`${styles.sendBtn} ${(input.trim() && !loading && threadId) ? styles.sendActive : ''}`}
+            className={`${styles.sendBtn} ${(input.trim() && !loading) ? styles.sendActive : ''}`}
             onClick={() => sendMessage()}
-            disabled={!input.trim() || loading || !threadId}
+            disabled={!input.trim() || loading}
           >
             {loading
               ? <Loader size={18} className={styles.spin} />
