@@ -1,16 +1,15 @@
-// src/firebase.js
-import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
- 
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+
 const firebaseConfig = {
-  apiKey: "AIzaSyAICByifCkJ5LSxMfRqgFE5yQ4iYKTMVnM",
-  authDomain: "gymbro-f4f1c.firebaseapp.com",
-  projectId: "gymbro-f4f1c",
-  storageBucket: "gymbro-f4f1c.firebasestorage.app",
-  messagingSenderId: "738856192695",
-  appId: "1:738856192695:web:3f8fb25acdfae470b01b32"
-}
- 
-const app = initializeApp(firebaseConfig)
-export const auth = getAuth(app)
- 
+  apiKey: "AIzaSyBJRlSTsRTXPFaOO_ErgKUOj5ILo8XJNdE",
+  authDomain: "gymbro-4d6f4.firebaseapp.com",
+  projectId: "gymbro-4d6f4",
+  storageBucket: "gymbro-4d6f4.firebasestorage.app",
+  messagingSenderId: "513183967049",
+  appId: "1:513183967049:web:60801d55af83cecebf5c98",
+  measurementId: "G-4Z0FQRNRGP"
+};
+
+const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);

@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Zap, ChevronRight, Flame, Target, Dumbbell,
-  Calculator, SkipForward, Check
+  Calculator, SkipForward, Check, Loader
 } from 'lucide-react'
 import {
   createUserWithEmailAndPassword,
@@ -13,7 +13,7 @@ import {
 } from 'firebase/auth'
 import { auth } from '../firebase'
 import { useAuth } from '../hooks/useAuth'
-import api, { createThread } from '../api'
+import api from '../api'
 import styles from './LoginPage.module.css'
 
 const GOALS   = ['cut', 'bulk', 'maintenance']
@@ -101,7 +101,7 @@ export default function LoginPage() {
     setCalcOpen(false)
   }
 
-  // ── UNCHANGED: After onboarding form submit ──────────────────
+  // ── After onboarding form submit ──────────────────
   const finishOnboarding = async () => {
     const uid = firebaseUser?.uid
     if (!uid) {
@@ -112,7 +112,6 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
     try {
-      // Use api (axios) not raw fetch — token must be attached for backend to accept the request
       const data     = await api.post('/user', {
         ...form,
         id:               uid,
@@ -134,8 +133,7 @@ export default function LoginPage() {
         height_cm:       parseFloat(form.height_cm),
       }
       login(userData)
-      const thread = await createThread(String(userData.id)).catch(() => null)
-      navigate(thread ? `/chat/${thread.id}` : '/chat', { replace: true })
+      navigate('/chat', { replace: true })
     } catch {
       setError('Failed to save profile. Try again.')
     } finally {
@@ -143,21 +141,18 @@ export default function LoginPage() {
     }
   }
 
-  // ── UNCHANGED: Existing user login ──────────────────────────
+  // ── Existing user login ──────────────────────────
   const fetchAndLoginExistingUser = async (firebaseUid) => {
     try {
-      // Use api (axios) not raw fetch — axios interceptor attaches Firebase token automatically.
-      // Raw fetch would return 401 because backend requires Authorization header on all routes.
       const data   = await api.get(`/user/${firebaseUid}`).then(r => r.data)
       login(data)
-      const thread = await createThread(String(data.id)).catch(() => null)
-      navigate(thread ? `/chat/${thread.id}` : '/chat', { replace: true })
+      navigate('/chat', { replace: true })
       return true
     } catch {}
     return false
   }
 
-  // ── UNCHANGED: Email auth ────────────────────────────────────
+  // ── Email auth ────────────────────────────────────
   const handleEmailAuth = async (e) => {
     e.preventDefault()
     setLoading(true)
@@ -186,7 +181,7 @@ export default function LoginPage() {
     }
   }
 
-  // ── UNCHANGED: Google auth ───────────────────────────────────
+  // ── Google auth ───────────────────────────────────
   const handleGoogle = async () => {
     setLoading(true)
     setError('')
@@ -216,50 +211,57 @@ export default function LoginPage() {
       return
     }
     setError('')
-    // Reset calculator state for fresh use on step 4
     setCalcResult(null)
     setApplied(false)
     setCalcOpen(false)
     setStep(4)
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // RENDER
-  // ─────────────────────────────────────────────────────────────
-
   // ── Step 1: Landing ──────────────────────────────────────────
   if (step === 1) return (
-    <div className={styles.page}>
-      <div className="glow-orb glow-orb-1" />
-      <div className="glow-orb glow-orb-2" />
-      <div className={styles.container}>
-        <div className={`${styles.welcome} animate-fade-up`}>
-          <div className={styles.welcomeIcon}><Zap size={32} fill="currentColor" /></div>
-          <h1 className={styles.welcomeTitle}>FitDesi</h1>
-          <p className={styles.welcomeSub}>
-            Your no-BS AI gym bro.<br />Built for Indian hostels, desi diets, real gains.
-          </p>
-          <div className={styles.featureRow}>
-            {[
-              { icon: Flame,    text: 'Track calories with AI' },
-              { icon: Dumbbell, text: 'Indian food database'   },
-              { icon: Target,   text: 'Hit your macro goals'   },
-            ].map(({ icon: Icon, text }) => (
-              <div key={text} className={styles.featureChip}>
-                <Icon size={14} /><span>{text}</span>
-              </div>
-            ))}
+    <div className={styles.authPage}>
+      <div className={styles.authLeft}>
+        <div className={styles.brandContainer}>
+          <div className={styles.brandIcon}><Zap size={40} fill="currentColor" /></div>
+          <h1 className={styles.brandName}>FitDesi</h1>
+          <p className={styles.brandTagline}>Your no-BS AI gym bro.</p>
+          <div className={styles.brandDescription}>
+            Built for Indian hostels, desi diets, and real gains. Track calories, log meals, and hit your macros with AI that understands <em>paranthas</em> and <em>paneer</em>.
           </div>
-          <button className={`btn btn-primary ${styles.startBtn}`} onClick={() => setStep(2)}>
-            Get Started <ChevronRight size={16} />
+          <div className={styles.brandStats}>
+            <div className={styles.brandStat}>
+              <Flame size={20} />
+              <span>AI Macro Tracking</span>
+            </div>
+            <div className={styles.brandStat}>
+              <Dumbbell size={20} />
+              <span>Hostel-Friendly Advice</span>
+            </div>
+            <div className={styles.brandStat}>
+              <Target size={20} />
+              <span>No-Nonsense Gains</span>
+            </div>
+          </div>
+        </div>
+        <div className={styles.leftFooter}>
+          Join 5,000+ desi lifters today.
+        </div>
+      </div>
+      <div className={styles.authRight}>
+        <div className={`${styles.formWrapper} animate-fade-up`}>
+          <div className={styles.welcomeText}>
+            <h2>Ready to transform?</h2>
+            <p>Choose how you want to start your fitness journey.</p>
+          </div>
+          <button className={`btn btn-primary ${styles.giantBtn}`} onClick={() => setStep(2)}>
+            Get Started <ChevronRight size={20} />
           </button>
-          <button
-            className={`btn btn-ghost ${styles.startBtn}`}
-            style={{ marginTop: 8 }}
-            onClick={() => { setAuthMode('login'); setStep(2) }}
-          >
-            Already have an account? Log in
-          </button>
+          <div className={styles.altAction}>
+            <span>Already using FitDesi?</span>
+            <button className={styles.textLink} onClick={() => { setAuthMode('login'); setStep(2) }}>
+              Log in to your account
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -267,61 +269,62 @@ export default function LoginPage() {
 
   // ── Step 2: Firebase Auth ────────────────────────────────────
   if (step === 2) return (
-    <div className={styles.page}>
-      <div className="glow-orb glow-orb-1" />
-      <div className="glow-orb glow-orb-2" />
-      <div className={styles.container}>
-        <form className={`${styles.formCard} card animate-fade-up`} onSubmit={handleEmailAuth}>
-          <div className={styles.formHeader}>
-            <div className={styles.logoSmall}><Zap size={14} fill="currentColor" /></div>
-            <span>{authMode === 'signup' ? 'Create Account' : 'Welcome Back'}</span>
+    <div className={styles.authPage}>
+      <div className={styles.authLeft}>
+        <div className={styles.brandContainer}>
+          <div className={styles.brandIcon}><Zap size={40} fill="currentColor" /></div>
+          <h1 className={styles.brandName}>FitDesi</h1>
+          <p className={styles.brandTagline}>Join the community.</p>
+          <div className={styles.brandDescription}>
+            "Bhai, paneer bhurji mein kitna protein hai?" — FitDesi knows. Stop guessing, start growing.
+          </div>
+          <div className={styles.quoteCard}>
+            <p>"Hostel mess food used to be a nightmare for my gains. FitDesi helped me track exactly what I was eating and adjusted my targets accordingly."</p>
+            <div className={styles.quoteAuthor}>— Rahul, IIT Delhi</div>
+          </div>
+        </div>
+      </div>
+      <div className={styles.authRight}>
+        <form className={`${styles.authForm} animate-fade-up`} onSubmit={handleEmailAuth}>
+          <div className={styles.formHead}>
+            <h1>{authMode === 'signup' ? 'Create Account' : 'Welcome Back'}</h1>
+            <p>{authMode === 'signup' ? 'Enter your details to create your profile.' : 'Sign in to continue your progress.'}</p>
           </div>
 
-          <button type="button" className="btn btn-ghost"
-            style={{ width: '100%', justifyContent: 'center', gap: 8 }}
-            onClick={handleGoogle} disabled={loading}>
-            <img
-              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-              width={18} height={18} alt="Google"
-            />
+          <button type="button" className={styles.googleBtn} onClick={handleGoogle} disabled={loading}>
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width={20} height={20} alt="Google" />
             Continue with Google
           </button>
 
-          <div className={styles.orDivider}>— or use email —</div>
-
-          <div className={styles.fieldGrid}>
-            <div className={styles.field} style={{ gridColumn: '1/-1' }}>
-              <label>Email</label>
-              <input className="input" type="email" placeholder="rohan@gmail.com"
-                value={creds.email} onChange={e => setCred('email', e.target.value)} required />
-            </div>
-            <div className={styles.field} style={{ gridColumn: '1/-1' }}>
-              <label>Password</label>
-              <input className="input" type="password" placeholder="Min 6 characters"
-                value={creds.password} onChange={e => setCred('password', e.target.value)} required />
-            </div>
+          <div className={styles.formDivider}>
+            <span>or use email</span>
           </div>
 
-          {error && <div className={styles.error}>{error}</div>}
+          <div className={styles.inputGroup}>
+            <label>Email Address</label>
+            <input type="email" placeholder="rohan@gmail.com" value={creds.email} onChange={e => setCred('email', e.target.value)} required />
+          </div>
 
-          <button type="submit" className={`btn btn-primary ${styles.submitBtn}`} disabled={loading}>
-            {loading
-              ? 'Please wait...'
-              : authMode === 'signup'
-                ? <> Sign Up <ChevronRight size={16} /></>
-                : <> Log In  <ChevronRight size={16} /></>
-            }
+          <div className={styles.inputGroup}>
+            <label>Password</label>
+            <input type="password" placeholder="At least 6 characters" value={creds.password} onChange={e => setCred('password', e.target.value)} required />
+          </div>
+
+          {error && <div className={styles.authError}>{error}</div>}
+
+          <button type="submit" className={`btn btn-primary ${styles.giantBtn}`} disabled={loading}>
+            {loading ? <Loader size={20} className={styles.spin} /> : authMode === 'signup' ? 'Sign Up' : 'Log In'}
           </button>
 
-          <button type="button" className={styles.backBtn}
-            onClick={() => setAuthMode(m => m === 'signup' ? 'login' : 'signup')}>
-            {authMode === 'signup'
-              ? 'Already have an account? Log in'
-              : "Don't have an account? Sign up"}
-          </button>
+          <div className={styles.formFooter}>
+            {authMode === 'signup' ? "Already have an account?" : "Don't have an account?"}
+            <button type="button" onClick={() => setAuthMode(m => m === 'signup' ? 'login' : 'signup')}>
+              {authMode === 'signup' ? 'Log In' : 'Sign Up'}
+            </button>
+          </div>
 
-          <button type="button" className={styles.backBtn} onClick={() => setStep(1)}>
-            ← Back
+          <button type="button" className={styles.backLink} onClick={() => setStep(1)}>
+            ← Back to home
           </button>
         </form>
       </div>
@@ -330,39 +333,42 @@ export default function LoginPage() {
 
   // ── Step 3: Basic Profile Info ───────────────────────────────
   if (step === 3) return (
-    <div className={styles.page}>
-      <div className="glow-orb glow-orb-1" />
-      <div className="glow-orb glow-orb-2" />
-      <div className={styles.container}>
-        <form className={`${styles.formCard} card animate-fade-up`} onSubmit={handleStep3Next}>
-          <div className={styles.formHeader}>
-            <div className={styles.logoSmall}><Zap size={14} fill="currentColor" /></div>
-            <span>Build your profile</span>
-            <div className={styles.stepPill}>Step 1 of 2</div>
+    <div className={styles.authPage}>
+      <div className={styles.authLeft}>
+        <div className={styles.brandContainer}>
+          <div className={styles.brandIcon}><Zap size={40} fill="currentColor" /></div>
+          <h1 className={styles.brandName}>FitDesi</h1>
+          <p className={styles.brandTagline}>Tell us about yourself.</p>
+          <div className={styles.brandDescription}>
+            We use these details to calculate your maintenance calories and macro targets. Don't worry, you can always change these later.
+          </div>
+        </div>
+      </div>
+      <div className={styles.authRight}>
+        <form className={`${styles.authForm} animate-fade-up`} onSubmit={handleStep3Next}>
+          <div className={styles.formHead}>
+            <h1>Build your profile</h1>
+            <p>Step 1 of 2: Basic Information</p>
           </div>
 
-          <div className={styles.fieldGrid}>
-            <div className={styles.field} style={{ gridColumn: '1/-1' }}>
+          <div className={styles.inputGrid}>
+            <div className={styles.inputGroup} style={{ gridColumn: '1/-1' }}>
               <label>Your Name *</label>
-              <input className="input" placeholder="e.g. Rohan Sharma"
-                value={form.name} onChange={e => set('name', e.target.value)} required />
+              <input placeholder="e.g. Rohan Sharma" value={form.name} onChange={e => set('name', e.target.value)} required />
             </div>
-            <div className={styles.field}>
+            <div className={styles.inputGroup}>
               <label>Age *</label>
-              <input className="input" type="number" placeholder="21"
-                value={form.age} onChange={e => set('age', e.target.value)} required />
+              <input type="number" placeholder="21" value={form.age} onChange={e => set('age', e.target.value)} required />
             </div>
-            <div className={styles.field}>
+            <div className={styles.inputGroup}>
               <label>Weight (kg) *</label>
-              <input className="input" type="number" step="0.1" placeholder="70"
-                value={form.weight_kg} onChange={e => set('weight_kg', e.target.value)} required />
+              <input type="number" step="0.1" placeholder="70" value={form.weight_kg} onChange={e => set('weight_kg', e.target.value)} required />
             </div>
-            <div className={styles.field}>
+            <div className={styles.inputGroup}>
               <label>Height (cm) *</label>
-              <input className="input" type="number" placeholder="175"
-                value={form.height_cm} onChange={e => set('height_cm', e.target.value)} required />
+              <input type="number" placeholder="175" value={form.height_cm} onChange={e => set('height_cm', e.target.value)} required />
             </div>
-            <div className={styles.field}>
+            <div className={styles.inputGroup}>
               <label>Goal *</label>
               <div className={styles.pillGroup}>
                 {GOALS.map(g => (
@@ -373,7 +379,7 @@ export default function LoginPage() {
                 ))}
               </div>
             </div>
-            <div className={styles.field}>
+            <div className={styles.inputGroup}>
               <label>Diet *</label>
               <div className={styles.pillGroup}>
                 {DIETS.map(d => (
@@ -386,10 +392,10 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {error && <div className={styles.error}>{error}</div>}
+          {error && <div className={styles.authError}>{error}</div>}
 
-          <button type="submit" className={`btn btn-primary ${styles.submitBtn}`}>
-            Next <ChevronRight size={16} />
+          <button type="submit" className={`btn btn-primary ${styles.giantBtn}`} disabled={loading}>
+            Next <ChevronRight size={20} />
           </button>
         </form>
       </div>
@@ -398,100 +404,81 @@ export default function LoginPage() {
 
   // ── Step 4: Macro Targets (Optional, with Calculator) ────────
   return (
-    <div className={styles.page}>
-      <div className="glow-orb glow-orb-1" />
-      <div className="glow-orb glow-orb-2" />
-      <div className={styles.container}>
-        <div className={`${styles.formCard} card animate-fade-up`}>
-
-          <div className={styles.formHeader}>
-            <div className={styles.logoSmall}><Target size={14} /></div>
-            <span>Set Your Targets</span>
-            <div className={styles.stepPill}>Step 2 of 2</div>
+    <div className={styles.authPage}>
+      <div className={styles.authLeft}>
+        <div className={styles.brandContainer}>
+          <div className={styles.brandIcon}><Target size={40} /></div>
+          <h1 className={styles.brandName}>Targets</h1>
+          <p className={styles.brandTagline}>Fuel your gains correctly.</p>
+          <div className={styles.brandDescription}>
+            "Bhai protein kitna chahiye?" — Standard desi diet can be low on protein. We help you set realistic targets based on your goals.
+          </div>
+          <div className={styles.quoteCard}>
+            <p>Most Indians consume less than 50g protein daily. For muscle growth, you ideally need 1.5g to 2g per kg of body weight.</p>
+          </div>
+        </div>
+      </div>
+      <div className={styles.authRight}>
+        <div className={`${styles.authForm} animate-fade-up`}>
+          <div className={styles.formHead}>
+            <h1>Set Your Targets</h1>
+            <p>Step 2 of 2: Calorie & Protein goals</p>
           </div>
 
-          <p className={styles.stepSubtitle}>
-            Set your daily calorie and protein targets, or skip to use defaults.
-          </p>
-
-          {/* Manual inputs (Mode B — default) */}
-          <div className={styles.fieldGrid}>
-            <div className={styles.field}>
+          <div className={styles.inputGrid}>
+            <div className={styles.inputGroup}>
               <label>
                 Daily Calories
-                {applied && (
-                  <span className={styles.calculatedTag}>
-                    <Check size={10} /> calculated
-                  </span>
-                )}
+                {applied && <span className={styles.calculatedTag}><Check size={10} /> calculated</span>}
               </label>
-              <input className="input" type="number" placeholder="e.g. 2000"
-                value={form.target_calories}
+              <input type="number" placeholder="e.g. 2000" value={form.target_calories}
                 onChange={e => { set('target_calories', e.target.value); setApplied(false) }} />
             </div>
-            <div className={styles.field}>
+            <div className={styles.inputGroup}>
               <label>
                 Daily Protein (g)
-                {applied && (
-                  <span className={styles.calculatedTag}>
-                    <Check size={10} /> calculated
-                  </span>
-                )}
+                {applied && <span className={styles.calculatedTag}><Check size={10} /> calculated</span>}
               </label>
-              <input className="input" type="number" placeholder="e.g. 120"
-                value={form.target_protein}
+              <input type="number" placeholder="e.g. 120" value={form.target_protein}
                 onChange={e => { set('target_protein', e.target.value); setApplied(false) }} />
             </div>
           </div>
 
-          {/* Calculator toggle */}
-          <button
-            type="button"
-            className={`${styles.calcToggleBtn} ${calcOpen ? styles.calcToggleOpen : ''}`}
-            onClick={() => { setCalcOpen(o => !o); if (!calcOpen) runCalc() }}
-          >
-            <Calculator size={15} />
-            {calcOpen ? 'Hide Calculator' : "Don't know your targets? Calculate them"}
+          <button type="button" className={`${styles.calcToggleBtn} ${calcOpen ? styles.calcToggleOpen : ''}`}
+            onClick={() => { setCalcOpen(o => !o); if (!calcOpen) runCalc() }}>
+            <Calculator size={16} />
+            {calcOpen ? 'Hide Calculator' : "Calculate targets for me"}
           </button>
 
-          {/* Calculator panel (Mode A) */}
           {calcOpen && (
             <div className={`${styles.calcPanel} animate-fade-up`}>
               <div className={styles.calcPanelTitle}>
-                Based on: {form.weight_kg}kg · {form.height_cm}cm · Age {form.age} · Goal: {form.goal}
+                {form.weight_kg}kg · {form.height_cm}cm · Age {form.age} · Goal: {form.goal}
               </div>
-
-              {/* Gender */}
               <div className={styles.calcField}>
                 <label>Gender</label>
                 <div className={styles.pillGroup}>
                   {GENDERS.map(g => (
                     <button type="button" key={g}
                       className={`${styles.pill} ${gender === g ? styles.pillActive : ''}`}
-                      onClick={() => handleGenderChange(g)}
-                      style={{ textTransform: 'capitalize' }}>{g}
+                      onClick={() => handleGenderChange(g)}>{g}
                     </button>
                   ))}
                 </div>
               </div>
-
-              {/* Activity level */}
               <div className={styles.calcField}>
                 <label>Activity Level</label>
                 <div className={styles.activityGrid}>
                   {ACTIVITIES.map(a => (
                     <button type="button" key={a.key}
                       className={`${styles.activityCard} ${activity === a.key ? styles.activityActive : ''}`}
-                      onClick={() => handleActivityChange(a.key)}
-                    >
+                      onClick={() => handleActivityChange(a.key)}>
                       <div className={styles.activityLabel}>{a.label}</div>
                       <div className={styles.activitySub}>{a.sub}</div>
                     </button>
                   ))}
                 </div>
               </div>
-
-              {/* Results */}
               {calcResult && (
                 <div className={styles.calcResult}>
                   <div className={styles.calcResultGrid}>
@@ -501,59 +488,37 @@ export default function LoginPage() {
                     </div>
                     <div className={styles.calcStat}>
                       <div className={styles.calcStatVal}>{calcResult.tdee}</div>
-                      <div className={styles.calcStatLabel}>Maintenance</div>
+                      <div className={styles.calcStatLabel}>TDEE</div>
                     </div>
                     <div className={styles.calcStat}>
-                      <div className={styles.calcStatVal} style={{ color: 'var(--accent)' }}>
-                        {calcResult.targetCal}
-                      </div>
-                      <div className={styles.calcStatLabel}>Target ({form.goal})</div>
+                      <div className={styles.calcStatVal} style={{ color: 'var(--accent)' }}>{calcResult.targetCal}</div>
+                      <div className={styles.calcStatLabel}>Target</div>
                     </div>
                     <div className={styles.calcStat}>
-                      <div className={styles.calcStatVal} style={{ color: 'var(--green)' }}>
-                        {calcResult.targetProtein}g
-                      </div>
+                      <div className={styles.calcStatVal} style={{ color: 'var(--green)' }}>{calcResult.targetProtein}g</div>
                       <div className={styles.calcStatLabel}>Protein</div>
                     </div>
                   </div>
-
-                  <div className={styles.calcLogic}>
-                    💡 {form.goal === 'cut'
-                      ? `Cut = Maintenance (${calcResult.tdee}) × 75% = ${calcResult.targetCal} kcal (25% deficit)`
-                      : form.goal === 'bulk'
-                      ? `Bulk = Maintenance (${calcResult.tdee}) + 300 kcal → lean muscle gain`
-                      : `Maintenance = your TDEE, no surplus or deficit`
-                    }
-                  </div>
-
-                  <button type="button"
-                    className={`btn btn-primary ${styles.applyBtn}`}
-                    onClick={applyCalcResult}>
-                    <Check size={15} /> Use these numbers
+                  <button type="button" className={`btn btn-primary ${styles.applyBtn}`} onClick={applyCalcResult}>
+                    <Check size={16} /> Apply these targets
                   </button>
                 </div>
               )}
             </div>
           )}
 
-          {error && <div className={styles.error}>{error}</div>}
+          {error && <div className={styles.authError}>{error}</div>}
 
-          {/* Action row */}
-          <div className={styles.actionRow}>
-            <button type="button" className={styles.skipBtn}
-              onClick={finishOnboarding} disabled={loading}>
-              <SkipForward size={14} />
-              {loading ? 'Setting up...' : 'Skip'}
+          <div className={styles.onboardingActions} style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
+            <button type="button" className={styles.skipBtn} onClick={finishOnboarding} disabled={loading} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '14px', borderRadius: '12px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+              <SkipForward size={16} /> Skip
             </button>
-            <button type="button"
-              className={`btn btn-primary ${styles.submitBtnFlex}`}
-              onClick={finishOnboarding}
-              disabled={loading}>
-              {loading ? 'Setting up...' : <>Let's Go 💪 <ChevronRight size={16} /></>}
+            <button type="button" className={`btn btn-primary ${styles.giantBtn}`} onClick={finishOnboarding} disabled={loading} style={{ flex: 2 }}>
+              {loading ? <Loader size={20} className={styles.spin} /> : <>Continue 💪</>}
             </button>
           </div>
 
-          <button type="button" className={styles.backBtn} onClick={() => setStep(3)}>
+          <button type="button" className={styles.backLink} onClick={() => setStep(3)}>
             ← Back
           </button>
         </div>
