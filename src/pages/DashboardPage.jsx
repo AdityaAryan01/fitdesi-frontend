@@ -1,19 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Flame, Dumbbell, Droplets, TrendingUp, Award, Target } from 'lucide-react'
-import { RadialBarChart, RadialBar, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
+import { AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts'
 import { useAuth } from '../hooks/useAuth'
-import { getProgress } from '../api'
+import { getProgress, getWeeklyProgress } from '../api'
 import styles from './DashboardPage.module.css'
-
-const WEEK_MOCK = [
-  { day: 'Mon', cal: 1800, protein: 98 },
-  { day: 'Tue', cal: 2100, protein: 115 },
-  { day: 'Wed', cal: 1650, protein: 89 },
-  { day: 'Thu', cal: 1950, protein: 108 },
-  { day: 'Fri', cal: 2200, protein: 130 },
-  { day: 'Sat', cal: 1700, protein: 95 },
-  { day: 'Sun', cal: 0,    protein: 0 },
-]
 
 function RadialProgress({ value, max, color, size = 120, strokeWidth = 10, children }) {
   const pct = Math.min((value / max) * 100, 100)
@@ -64,14 +54,39 @@ function StatCard({ icon: Icon, label, value, max, unit, color, colorClass }) {
   )
 }
 
+// Custom tooltip for the weekly chart
+function WeeklyTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null
+  return (
+    <div style={{
+      background: 'var(--bg-card)',
+      border: '1px solid var(--border)',
+      borderRadius: 8,
+      padding: '10px 14px',
+      fontSize: 12,
+      fontFamily: 'JetBrains Mono, monospace',
+    }}>
+      <div style={{ color: 'var(--text-primary)', fontWeight: 700, marginBottom: 6 }}>{label}</div>
+      {payload.map(p => (
+        <div key={p.dataKey} style={{ color: p.color, marginBottom: 2 }}>
+          {p.name}: <strong>{p.value}</strong>{p.dataKey === 'cal' ? ' kcal' : 'g'}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function DashboardPage() {
   const { user } = useAuth()
-  const [progress, setProgress] = useState({ total_calories: 0, total_protein: 0, meals: [] })
-  const [loading, setLoading] = useState(true)
+  const [progress, setProgress]     = useState({ total_calories: 0, total_protein: 0, meals: [] })
+  const [weeklyData, setWeeklyData] = useState([])
+  const [loading, setLoading]       = useState(true)
+  const [weeklyLoading, setWeeklyLoading] = useState(true)
 
   const targetCal = user?.target_calories || 2000
-  const targetPro = user?.target_protein || 120
+  const targetPro = user?.target_protein  || 120
 
+  // Fetch today's progress
   useEffect(() => {
     if (!user?.id) return
     getProgress(user.id)
@@ -80,11 +95,27 @@ export default function DashboardPage() {
       .finally(() => setLoading(false))
   }, [user?.id])
 
-  const calPct = Math.min(Math.round((progress.total_calories / targetCal) * 100), 100)
-  const proPct = Math.min(Math.round((progress.total_protein / targetPro) * 100), 100)
+  // Fetch real weekly data from /api/user/{id}/weekly
+  useEffect(() => {
+    if (!user?.id) return
+    getWeeklyProgress(user.id)
+      .then(setWeeklyData)
+      .catch(() => setWeeklyData([]))
+      .finally(() => setWeeklyLoading(false))
+  }, [user?.id])
+
+  const calPct    = Math.min(Math.round((progress.total_calories / targetCal) * 100), 100)
+  const proPct    = Math.min(Math.round((progress.total_protein  / targetPro)  * 100), 100)
   const remaining = Math.max(targetCal - progress.total_calories, 0)
 
   const today = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })
+
+  // Weekly summary stats
+  const weeklyCalAvg   = weeklyData.length
+    ? Math.round(weeklyData.reduce((s, d) => s + d.cal, 0) / weeklyData.filter(d => d.cal > 0).length || 0)
+    : 0
+  const weeklyCalTotal = weeklyData.reduce((s, d) => s + d.cal, 0)
+  const activeDays     = weeklyData.filter(d => d.cal > 0).length
 
   return (
     <div className={styles.page}>
@@ -147,7 +178,9 @@ export default function DashboardPage() {
             {[
               calPct < 50 ? '⚡ Kal ke liye energy chahiye — kuch khao!' : calPct > 90 ? '🎯 Almost at your goal!' : '📊 Tracking is on point!',
               proPct < 60 ? '🥚 Protein low hai — eggs/dahi/dal lo' : '💪 Protein game strong!',
-              `🔥 ${calPct}% of daily calories consumed`,
+              activeDays > 0
+                ? `🔥 ${activeDays}/7 days logged this week`
+                : `🔥 ${calPct}% of daily calories consumed`,
             ].map((t, i) => (
               <div key={i} className={styles.tipItem}>{t}</div>
             ))}
@@ -157,12 +190,12 @@ export default function DashboardPage() {
 
       {/* Stats row */}
       <div className={styles.statsGrid}>
-        <StatCard icon={Flame}   label="Calories" value={progress.total_calories} max={targetCal} unit=" kcal" color="var(--accent)" colorClass="iconAccent" />
+        <StatCard icon={Flame}    label="Calories" value={progress.total_calories} max={targetCal} unit=" kcal" color="var(--accent)" colorClass="iconAccent" />
         <StatCard icon={Dumbbell} label="Protein"  value={progress.total_protein}  max={targetPro}  unit="g"    color="var(--green)"  colorClass="iconGreen" />
-        <StatCard icon={Target}  label="Goal"     value={calPct} max={100} unit="%" color="var(--steel)" colorClass="iconSteel" />
+        <StatCard icon={Target}   label="Goal"     value={calPct} max={100} unit="%" color="var(--steel)" colorClass="iconSteel" />
       </div>
 
-      {/* Today's meals — populated from /progress meals[] array */}
+      {/* Today's meals */}
       {progress.meals && progress.meals.length > 0 && (
         <div className={`card ${styles.mealsCard}`}>
           <div className={styles.chartHeader}>
@@ -184,15 +217,35 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Weekly chart */}
+      {/* Weekly chart — REAL DATA from /api/user/{id}/weekly */}
       <div className={`card ${styles.chartCard}`}>
         <div className={styles.chartHeader}>
           <TrendingUp size={16} color="var(--accent)" />
           <span className={styles.chartTitle}>Weekly Calories</span>
-          <span className="badge badge-accent">This Week</span>
+          {weeklyLoading ? (
+            <span className="badge badge-steel">Loading…</span>
+          ) : (
+            <span className="badge badge-accent">{activeDays}/7 days tracked</span>
+          )}
         </div>
+
+        {/* Weekly summary pills */}
+        {!weeklyLoading && weeklyData.length > 0 && (
+          <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+            <div style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+              Weekly total: <span style={{ color: 'var(--accent)', fontWeight: 700 }}>{weeklyCalTotal} kcal</span>
+            </div>
+            <div style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+              Daily avg: <span style={{ color: 'var(--accent)', fontWeight: 700 }}>{weeklyCalAvg} kcal</span>
+            </div>
+          </div>
+        )}
+
         <ResponsiveContainer width="100%" height={200}>
-          <AreaChart data={WEEK_MOCK} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+          <AreaChart
+            data={weeklyLoading ? [] : weeklyData}
+            margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+          >
             <defs>
               <linearGradient id="calGrad" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%"  stopColor="var(--accent)" stopOpacity={0.3} />
@@ -204,16 +257,47 @@ export default function DashboardPage() {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-            <XAxis dataKey="day" tick={{ fill: 'var(--text-muted)', fontSize: 11, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 11, fontFamily: 'JetBrains Mono' }} axisLine={false} tickLine={false} />
-            <Tooltip
-              contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12, fontFamily: 'JetBrains Mono' }}
-              labelStyle={{ color: 'var(--text-primary)' }}
-              itemStyle={{ color: 'var(--text-secondary)' }}
+            <XAxis
+              dataKey="day"
+              tick={{ fill: 'var(--text-muted)', fontSize: 11, fontFamily: 'JetBrains Mono' }}
+              axisLine={false}
+              tickLine={false}
             />
-            <Area type="monotone" dataKey="cal" stroke="var(--accent)" strokeWidth={2} fill="url(#calGrad)" name="Calories" />
+            <YAxis
+              tick={{ fill: 'var(--text-muted)', fontSize: 11, fontFamily: 'JetBrains Mono' }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <Tooltip content={<WeeklyTooltip />} />
+            <Area
+              type="monotone"
+              dataKey="cal"
+              stroke="var(--accent)"
+              strokeWidth={2}
+              fill="url(#calGrad)"
+              name="Calories"
+              dot={{ fill: 'var(--accent)', r: 3, strokeWidth: 0 }}
+              activeDot={{ r: 5 }}
+            />
+            <Area
+              type="monotone"
+              dataKey="protein"
+              stroke="var(--green)"
+              strokeWidth={2}
+              fill="url(#proGrad)"
+              name="Protein"
+              dot={{ fill: 'var(--green)', r: 3, strokeWidth: 0 }}
+              activeDot={{ r: 5 }}
+            />
           </AreaChart>
         </ResponsiveContainer>
+
+        {/* Empty state */}
+        {!weeklyLoading && activeDays === 0 && (
+          <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--text-muted)', fontSize: '0.8rem', fontFamily: 'var(--font-mono)' }}>
+            No meals logged this week yet. Start chatting with FitDesi! 💬
+          </div>
+        )}
       </div>
 
       {/* Body stats */}

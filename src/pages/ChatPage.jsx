@@ -114,7 +114,7 @@ export default function ChatPage() {
     if (!threadId && user?.id && !isCreatingThread) {
       setIsCreating(true)
       createThread(String(user.id))
-        .then(thread => navigate(`/chat/${thread.id}`, { replace: true }))
+        .then(thread => { setIsCreating(false); navigate(`/chat/${thread.id}`, { replace: true }) })
         .catch(() => {
           // Backend unreachable — show welcome msg, user can still use New Conversation btn
           setMessages([WELCOME_MSG(user?.name)])

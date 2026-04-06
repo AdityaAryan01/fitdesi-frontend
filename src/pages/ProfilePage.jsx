@@ -156,7 +156,7 @@ export default function ProfilePage() {
         <Zap size={14} color="var(--accent)" />
         <span>
           {user?.goal === 'cut'
-            ? 'On a cut: aim for 500 kcal deficit. High protein prevents muscle loss. Prioritize sleep — growth hormone peaks at night.'
+            ? 'On a cut: aim for 25% kcal deficit. High protein prevents muscle loss. Prioritize sleep — growth hormone peaks at night.'
             : user?.goal === 'bulk'
             ? 'On a bulk: eat 300–500 kcal surplus. Train heavy compound lifts. Track progressive overload every session.'
             : 'Maintenance: match TDEE calories. Focus on building strength and body recomp over time.'}

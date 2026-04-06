@@ -16,7 +16,7 @@
   z-index: 1;
 }
 
-/* Welcome */
+/* ── Welcome ───────────────────────────────────────── */
 .welcome {
   text-align: center;
   display: flex;
@@ -89,7 +89,7 @@
   font-family: var(--font-mono);
 }
 
-/* Form */
+/* ── Form card ─────────────────────────────────────── */
 .formCard {
   padding: 28px;
   display: flex;
@@ -115,8 +115,39 @@
   align-items: center;
   justify-content: center;
   color: white;
+  flex-shrink: 0;
 }
 
+/* Step pill (top-right of form header) */
+.stepPill {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 3px 10px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.stepSubtitle {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-top: -8px;
+}
+
+/* Or divider (step 2) */
+.orDivider {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+}
+
+/* ── Field grid ────────────────────────────────────── */
 .fieldGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -130,6 +161,9 @@
 }
 
 .field label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-muted);
@@ -138,6 +172,7 @@
   font-family: var(--font-mono);
 }
 
+/* ── Pills ─────────────────────────────────────────── */
 .pillGroup {
   display: flex;
   gap: 6px;
@@ -169,6 +204,7 @@
   color: var(--accent) !important;
 }
 
+/* ── Error ─────────────────────────────────────────── */
 .error {
   background: rgba(239,68,68,0.1);
   border: 1px solid rgba(239,68,68,0.3);
@@ -178,11 +214,20 @@
   font-size: 0.85rem;
 }
 
+/* ── Buttons ───────────────────────────────────────── */
 .submitBtn {
   width: 100%;
   justify-content: center;
   padding: 14px;
   font-size: 0.95rem;
+}
+
+/* flex version for action row */
+.submitBtnFlex {
+  flex: 1;
+  justify-content: center;
+  padding: 13px;
+  font-size: 0.9rem;
 }
 
 .backBtn {
@@ -196,3 +241,206 @@
   transition: color 0.18s;
 }
 .backBtn:hover { color: var(--text-secondary); }
+
+/* ── Step 4: Calculated tag ────────────────────────── */
+.calculatedTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.62rem;
+  color: var(--green);
+  font-family: var(--font-mono);
+  background: var(--green-dim);
+  padding: 2px 6px;
+  border-radius: 99px;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 600;
+}
+
+/* ── Step 4: Calculator toggle button ──────────────── */
+.calcToggleBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 16px;
+  background: var(--bg-elevated);
+  border: 1px dashed var(--border-accent);
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s;
+  letter-spacing: 0.01em;
+}
+
+.calcToggleBtn:hover,
+.calcToggleOpen {
+  background: var(--accent-dim);
+  border-style: solid;
+}
+
+/* ── Step 4: Calculator panel ──────────────────────── */
+.calcPanel {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.calcPanelTitle {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  line-height: 1.5;
+}
+
+.calcField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.calcField label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: var(--font-mono);
+}
+
+/* Activity cards grid */
+.activityGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.activityCard {
+  padding: 10px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s;
+}
+
+.activityCard:hover { border-color: var(--accent); }
+
+.activityActive {
+  background: var(--accent-dim) !important;
+  border-color: var(--accent) !important;
+}
+
+.activityLabel {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+.activityActive .activityLabel { color: var(--accent); }
+
+.activitySub {
+  font-size: 0.67rem;
+  color: var(--text-muted);
+  margin-top: 3px;
+  font-family: var(--font-mono);
+  line-height: 1.3;
+}
+
+/* Result cards */
+.calcResult {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.calcResultGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.calcStat {
+  text-align: center;
+  padding: 10px 6px;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.calcStatVal {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  letter-spacing: 0.04em;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.calcStatLabel {
+  font-size: 0.58rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 5px;
+}
+
+.calcLogic {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  padding: 8px 12px;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--accent);
+}
+
+.applyBtn {
+  width: 100%;
+  justify-content: center;
+  padding: 11px;
+}
+
+/* ── Step 4: Action row (skip + submit) ────────────── */
+.actionRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.skipBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.skipBtn:hover {
+  color: var(--text-secondary);
+  border-color: var(--text-muted);
+}
+
+.skipBtn:disabled { opacity: 0.5; cursor: not-allowed; }
