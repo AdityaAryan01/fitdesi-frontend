@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import { User, Edit3, Save, X, Zap, Flame, Dumbbell, Activity, Target } from 'lucide-react'
+import { User, Edit3, Save, X, Zap, Flame, Dumbbell, Activity, Target, Calculator, Check } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
+import { updateUser } from '../api'
+import { GOALS, DIETS, GENDERS, ACTIVITIES, calcMacros } from '../utils/calculator'
 import styles from './ProfilePage.module.css'
-
-const GOALS = ['cut', 'bulk', 'maintenance']
-const DIETS  = ['veg', 'non-veg', 'eggetarian']
 
 function calcBMR(weight, height, age) {
   if (!weight || !height || !age) return null
@@ -28,12 +27,52 @@ function bmiLabel(bmi) {
 export default function ProfilePage() {
   const { user, login } = useAuth()
   const [editing, setEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({ ...user })
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
-  const save = () => {
-    login({ ...user, ...form })
-    setEditing(false)
+  // Calculator states
+  const [calcOpen, setCalcOpen] = useState(false)
+  const [calcResult, setCalcResult] = useState(null)
+  const [applied, setApplied] = useState(false)
+
+  const runCalc = (g = form.gender || 'male', a = form.activity_level || 'moderate', goal = form.goal) => {
+    const result = calcMacros(form.weight_kg, form.height_cm, form.age, g, a, goal)
+    setCalcResult(result)
+  }
+
+  const handleGenderChange = (g) => { set('gender', g); runCalc(g, form.activity_level, form.goal) }
+  const handleActivityChange = (a) => { set('activity_level', a); runCalc(form.gender || 'male', a, form.goal) }
+  
+  const handleGoalChange = (g) => {
+    set('goal', g)
+    if (editing) {
+      setCalcOpen(true)
+      runCalc(form.gender || 'male', form.activity_level || 'moderate', g)
+    }
+  }
+
+  const applyCalcResult = () => {
+    if (!calcResult) return
+    set('target_calories', String(calcResult.targetCal))
+    set('target_protein', String(calcResult.targetProtein))
+    setApplied(true)
+    setCalcOpen(false)
+  }
+
+  const save = async () => {
+    if (!user?.id) return
+    setSaving(true)
+    try {
+      const updatedUser = await updateUser(user.id, form)
+      login(updatedUser)
+      setEditing(false)
+    } catch (err) {
+      console.error('Failed to update profile:', err)
+      alert("Error saving profile. Please try again.")
+    } finally {
+      setSaving(false)
+    }
   }
   const cancel = () => {
     setForm({ ...user })
@@ -93,8 +132,13 @@ export default function ProfilePage() {
           <User size={16} color="var(--accent)" />
           <span>Personal Details</span>
           {editing && (
-            <button className="btn btn-primary" onClick={save} style={{ marginLeft: 'auto', padding: '8px 16px' }}>
-              <Save size={14}/> Save
+            <button 
+              className="btn btn-primary" 
+              onClick={save} 
+              disabled={saving}
+              style={{ marginLeft: 'auto', padding: '8px 16px', opacity: saving ? 0.7 : 1 }}
+            >
+              <Save size={14}/> {saving ? 'Saving...' : 'Save'}
             </button>
           )}
         </div>
@@ -105,8 +149,6 @@ export default function ProfilePage() {
             { key: 'age',       label: 'Age',            type: 'number', placeholder: '21' },
             { key: 'weight_kg', label: 'Weight (kg)',    type: 'number', placeholder: '70' },
             { key: 'height_cm', label: 'Height (cm)',    type: 'number', placeholder: '175' },
-            { key: 'target_calories', label: 'Target Calories', type: 'number', placeholder: '2000' },
-            { key: 'target_protein',  label: 'Target Protein (g)', type: 'number', placeholder: '120' },
           ].map(f => (
             <div key={f.key} className={styles.field}>
               <label>{f.label}</label>
@@ -120,13 +162,34 @@ export default function ProfilePage() {
           ))}
 
           <div className={styles.field}>
+            <label>Target Calories {applied && <span className={styles.calculatedTag}><Check size={10} /> calc</span>}</label>
+            {editing ? (
+              <input className="input" type="number" placeholder="2000"
+                value={form.target_calories || ''} onChange={e => { set('target_calories', e.target.value); setApplied(false) }} />
+            ) : (
+              <div className={styles.fieldVal}>{user?.target_calories || '—'}</div>
+            )}
+          </div>
+
+          <div className={styles.field}>
+            <label>Target Protein <span style={{fontSize:'0.8rem', textTransform:'none'}}>(g)</span> {applied && <span className={styles.calculatedTag}><Check size={10} /> calc</span>}</label>
+            {editing ? (
+              <input className="input" type="number" placeholder="120"
+                value={form.target_protein || ''} onChange={e => { set('target_protein', e.target.value); setApplied(false) }} />
+            ) : (
+              <div className={styles.fieldVal}>{user?.target_protein || '—'}</div>
+            )}
+          </div>
+
+
+          <div className={styles.field}>
             <label>Goal</label>
             {editing ? (
               <div className={styles.pillGroup}>
                 {GOALS.map(g => (
                   <button type="button" key={g}
                     className={`${styles.pill} ${form.goal === g ? styles.pillActive : ''}`}
-                    onClick={() => set('goal', g)}>{g}</button>
+                    onClick={() => handleGoalChange(g)}>{g}</button>
                 ))}
               </div>
             ) : (
@@ -148,6 +211,76 @@ export default function ProfilePage() {
               <div className={styles.fieldVal} style={{ textTransform: 'capitalize' }}>{user?.diet_type || '—'}</div>
             )}
           </div>
+
+          {editing && (
+            <div style={{ gridColumn: '1 / -1', marginTop: '10px' }}>
+              <button type="button" className={`${styles.calcToggleBtn} ${calcOpen ? styles.calcToggleOpen : ''}`}
+                onClick={() => { setCalcOpen(o => !o); if (!calcOpen) runCalc() }}>
+                <Calculator size={16} />
+                {calcOpen ? 'Hide Calculator' : "Recalculate Macros"}
+              </button>
+
+              {calcOpen && (
+                <div className={`${styles.calcPanel} animate-fade-up`}>
+                  <div className={styles.calcPanelTitle}>
+                    Updating parameters: {form.weight_kg}kg · {form.height_cm}cm · Age {form.age} · Goal: {form.goal}
+                  </div>
+                  
+                  <div className={styles.calcField}>
+                    <label>Gender</label>
+                    <div className={styles.pillGroup}>
+                      {GENDERS.map(g => (
+                        <button type="button" key={g}
+                          className={`${styles.pill} ${(form.gender || 'male') === g ? styles.pillActive : ''}`}
+                          onClick={() => handleGenderChange(g)}>{g}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className={styles.calcField}>
+                    <label>Activity Level</label>
+                    <div className={styles.activityGrid}>
+                      {ACTIVITIES.map(a => (
+                        <button type="button" key={a.key}
+                          className={`${styles.activityCard} ${(form.activity_level || 'moderate') === a.key ? styles.activityActive : ''}`}
+                          onClick={() => handleActivityChange(a.key)}>
+                          <div className={styles.activityLabel}>{a.label}</div>
+                          <div className={styles.activitySub}>{a.sub}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {calcResult && (
+                    <div className={styles.calcResult}>
+                      <div className={styles.calcResultGrid}>
+                        <div className={styles.calcStat}>
+                          <div className={styles.calcStatVal}>{calcResult.bmr}</div>
+                          <div className={styles.calcStatLabel}>BMR</div>
+                        </div>
+                        <div className={styles.calcStat}>
+                          <div className={styles.calcStatVal}>{calcResult.tdee}</div>
+                          <div className={styles.calcStatLabel}>TDEE</div>
+                        </div>
+                        <div className={styles.calcStat}>
+                          <div className={styles.calcStatVal} style={{ color: 'var(--accent)' }}>{calcResult.targetCal}</div>
+                          <div className={styles.calcStatLabel}>Target</div>
+                        </div>
+                        <div className={styles.calcStat}>
+                          <div className={styles.calcStatVal} style={{ color: 'var(--green)' }}>{calcResult.targetProtein}g</div>
+                          <div className={styles.calcStatLabel}>Protein</div>
+                        </div>
+                      </div>
+                      <button type="button" className={`btn btn-primary ${styles.applyBtn}`} onClick={applyCalcResult}>
+                        <Check size={16} /> Apply these targets
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
