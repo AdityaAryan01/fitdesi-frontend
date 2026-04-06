@@ -164,7 +164,13 @@ export default function ChatPage() {
     try {
       const data = await sendChat(String(user?.id || 'guest'), threadId, msg)
       setMessages(prev => [...prev, { role: 'bot', content: data.reply }])
-    } catch {
+
+      // ✅ FIX: If the backend created a title for this new thread, tell the Sidebar to refresh!
+      if (data.thread_title) {
+        window.dispatchEvent(new CustomEvent('refreshThreads'))
+      }
+    } 
+    catch {
       setMessages(prev => [...prev, {
         role: 'bot',
         content: "Yaar kuch technical issue aa gaya 😤 Backend check karo, I'll be back!"

@@ -29,6 +29,12 @@ export default function Sidebar() {
   // Re-fetch whenever the active thread changes — catches auto-created threads
   useEffect(() => { fetchThreads() }, [activeThreadId])
 
+   useEffect(() => {
+    const handleRefresh = () => fetchThreads()
+    window.addEventListener('refreshThreads', handleRefresh)
+    return () => window.removeEventListener('refreshThreads', handleRefresh)
+  }, [user?.id]) 
+
   const handleLogout = () => {
     logout()
     navigate('/login')
