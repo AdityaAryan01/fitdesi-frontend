@@ -43,4 +43,7 @@ export const getUser     = (user_id) => api.get(`/user/${String(user_id)}`).then
 export const createUser  = (data)    => api.post('/user', data).then(r => r.data)
 export const updateUser  = (user_id, data) => api.put(`/user/${String(user_id)}`, data).then(r => r.data)
 
+export const startUserDay = (user_id) => api.post(`/user/${String(user_id)}/day/start`).then(r => r.data)
+export const endUserDay   = (user_id) => api.post(`/user/${String(user_id)}/day/end`).then(r => r.data)
+
 export default api
