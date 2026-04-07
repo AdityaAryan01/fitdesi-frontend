@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { BookOpen, Flame, Dumbbell, Calendar, Search, RefreshCw, Trash2 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
-import { getMealLogs, deleteMealLog } from '../api'
+import { getMealLogs, deleteMealLog, getUser, startUserDay, endUserDay } from '../api'
 import styles from './LogsPage.module.css'
 
 export default function LogsPage() {
@@ -10,6 +10,12 @@ export default function LogsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState(false)
   const [search, setSearch]   = useState('')
+
+  // Day Tracking State
+  const [dayActive, setDayActive] = useState(false)
+  const [dayStartDate, setDayStartDate] = useState(null)
+  const [showOldDayPrompt, setShowOldDayPrompt] = useState(false)
+  const [loadingAction, setLoadingAction] = useState(false)
 
   const handleDelete = async (logId) => {
     if (!user?.id || !window.confirm('Delete this meal log?')) return
@@ -26,7 +32,28 @@ export default function LogsPage() {
     setLoading(true)
     setError(false)
     try {
-      // Calls GET /api/user/{user_id}/logs — returns today's individual meal entries
+      // 1. Fetch user to get tracking status
+      const uProfile = await getUser(String(user.id))
+      const isActive = !!uProfile.active_tracking_date
+      setDayActive(isActive)
+      
+      if (isActive && uProfile.active_tracking_start) {
+        setDayStartDate(new Date(uProfile.active_tracking_start + 'Z')) // ensure correct UTC/local mapping
+        
+        // check if old
+        const start = new Date(uProfile.active_tracking_start + 'Z')
+        const diffHours = (new Date() - start) / (1000 * 60 * 60)
+        if (diffHours > 16) {
+          setShowOldDayPrompt(true)
+        } else {
+          setShowOldDayPrompt(false)
+        }
+      } else {
+        setDayStartDate(null)
+        setShowOldDayPrompt(false)
+      }
+
+      // 2. Fetch logs
       const data = await getMealLogs(String(user.id))
       setLogs(Array.isArray(data) ? data : [])
     } catch {
@@ -36,6 +63,32 @@ export default function LogsPage() {
       setLoading(false)
     }
   }, [user?.id])
+
+  const handleStartDay = async () => {
+    if (!user?.id) return
+    setLoadingAction(true)
+    try {
+      await startUserDay(user.id)
+      await fetchLogs()
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoadingAction(false)
+    }
+  }
+
+  const handleEndDay = async () => {
+    if (!user?.id) return
+    setLoadingAction(true)
+    try {
+      await endUserDay(user.id)
+      await fetchLogs()
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoadingAction(false)
+    }
+  }
 
   useEffect(() => { 
     if (user?.id) {
@@ -56,6 +109,19 @@ export default function LogsPage() {
 
   return (
     <div className={styles.page}>
+      
+      {showOldDayPrompt && (
+        <div className={styles.warningAlert}>
+          <div style={{ flex: 1 }}>
+            <strong>Forgot to end your day?</strong>
+             <div style={{ fontSize: '0.85rem' }}>It looks like yesterday's tracking session is still active. End it now to start a new day fresh.</div>
+          </div>
+          <button className="btn" disabled={loadingAction} onClick={handleEndDay} style={{ background: 'var(--red)', borderColor: 'var(--red)' }}>
+            End Yesterday
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className={styles.header}>
         <div>
@@ -63,12 +129,27 @@ export default function LogsPage() {
           <div className={styles.headerSub}>
             <Calendar size={13} />
             <span>{today}</span>
+            {dayActive ? (
+                <span className={styles.activeBadge} style={{ color: 'var(--green)', border: '1px solid var(--border)', background: 'var(--green-dim)', padding: '2px 6px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>Active</span>
+            ) : (
+                <span className={styles.activeBadge} style={{ color: 'var(--text-muted)', border: '1px solid var(--border)', background: 'var(--bg-mid)', padding: '2px 6px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>Not Started</span>
+            )}
           </div>
         </div>
-        <button className="btn btn-ghost" onClick={fetchLogs} disabled={loading}>
-          <RefreshCw size={15} className={loading ? styles.spin : ''} />
-          Refresh
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {dayActive ? (
+            <button className="btn" onClick={handleEndDay} disabled={loadingAction} style={{ background: 'var(--bg-mid)', color: 'var(--text)', borderColor: 'var(--border)' }}>
+              End My Day
+            </button>
+          ) : (
+            <button className="btn" onClick={handleStartDay} disabled={loadingAction} style={{ background: 'var(--accent)', color: 'var(--bg)' }}>
+              Start My Day
+            </button>
+          )}
+          <button className="btn btn-ghost" onClick={fetchLogs} disabled={loading}>
+            <RefreshCw size={15} className={loading ? styles.spin : ''} />
+          </button>
+        </div>
       </div>
 
       {/* Summary bar — shows real totals from API */}
