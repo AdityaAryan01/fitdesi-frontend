@@ -41,5 +41,6 @@ export const getMealLogs = (user_id) => api.get(`/user/${String(user_id)}/logs`)
 export const deleteMealLog = (user_id, log_id) => api.delete(`/user/${String(user_id)}/logs/${String(log_id)}`).then(r => r.data)
 export const getUser     = (user_id) => api.get(`/user/${String(user_id)}`).then(r => r.data)
 export const createUser  = (data)    => api.post('/user', data).then(r => r.data)
+export const updateUser  = (user_id, data) => api.put(`/user/${String(user_id)}`, data).then(r => r.data)
 
 export default api
